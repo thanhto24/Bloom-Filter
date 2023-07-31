@@ -10,7 +10,7 @@ const int MAX_SIZE = 1000;
 
 int hash_1(string str)
 {
-    return ((int)(str[0]) + (int)(str[str.length() - 1]) + (int)(str[(str.length() - 1) / 2])) % MAX_SIZE;
+    return str.length() % MAX_SIZE;
 }
 
 int hash_2(string str)
@@ -94,24 +94,87 @@ bool *buildWeakPassBit()
     return bitArray;
 }
 
-bool validUsername(string s)
+bool validUsername(string username, bool bitArr[])
 {
+    if (username.length() <= 5 || username.length() >= 10)
+    {
+        cout << "Username must longer than 5 and shorter than 10!\n";
+        return false;
+    }
+    if (username.find(' ') != string::npos)
+    {
+        cout << "Username must not contain spaces!\n";
+        return false;
+    }
+    if (isContain(bitArr, username))
+    {
+        cout << "Username must not be the same as any registered Username!\n";
+        return false;
+    }
     return true;
 }
 
-bool validPassword(string s)
+bool checkPass(string pass)
 {
+    bool hasUpperCase = false;
+    bool hasLowerCase = false;
+    bool hasDigit = false;
+    bool hasSpecialChar = false;
+
+    for (char c : pass)
+    {
+        if (isupper(c))
+            hasUpperCase = true;
+        if (islower(c))
+            hasLowerCase = true;
+        if (isdigit(c))
+            hasDigit = true;
+        if (ispunct(c))
+            hasSpecialChar = true;
+        if (hasUpperCase && hasLowerCase && hasDigit && hasSpecialChar)
+            return true;
+    }
+    return false;
+}
+
+bool validPassword(string pass, string username, bool bitArr[])
+{
+    if (pass.length() <= 10 || pass.length() >= 20)
+    {
+        cout << "Password must longer than 10 and shorter than 20!\n";
+        return false;
+    }
+    if (pass.find(' ') != string::npos)
+    {
+        cout << "Password must not contain spaces!\n";
+        return false;
+    }
+    if (pass == username)
+    {
+        cout << "Password cannot be the same as username!\n";
+        return false;
+    }
+    if (!checkPass(pass))
+    {
+        cout << "Password must include uppercase, lowercase, numbers and special characters!\n";
+        return false;
+    }
+    if (isContain(bitArr, pass))
+    {
+        cout << "Your password is weak!\n";
+        return false;
+    }
     return true;
 }
 
-void process();
+void process(bool usernameBit[], bool weakPassBit[]);
 
-void backToMenu()
+void backToMenu(bool usernameBit[], bool weakPassBit[])
 {
     cout << "Press any key to back to menu!\n";
     char ch;
     ch = getch();
-    return process();
+    return process(usernameBit, weakPassBit);
 }
 
 void store(string username, string pass)
@@ -142,36 +205,43 @@ void storeFail(string username, string pass)
 
 void registration(int type, bool usernameBit[], bool weakPassBit[])
 {
+    bool flag = false;
     cout << "Registration\n";
     string username = "", pass = "";
     cout << "Username: ";
     getline(cin, username);
     cout << "Password: ";
     getline(cin, pass);
-    if (validUsername(username) && validPassword(pass))
+    if (validUsername(username, usernameBit))
     {
-        if (isContain(usernameBit, username))
-            cout << "Username was exists\n";
-        else
+        if (validPassword(pass, username, weakPassBit))
         {
             insertToBit(usernameBit, username);
             store(username, pass);
+            cout << "Register Successfully!\n";
+        }
+        else
+        {
+            if (type == 2)
+            {
+                storeFail(username, pass);
+                flag = true;
+            }
         }
     }
-    else if (type == 2)
-        storeFail(username, pass);
-    if (!validUsername(username))
-        cout << "Unvalid username!\n";
-    if (!validPassword(pass))
-        cout << "Unvalid password!\n";
+    else
+    {
+        if (type == 2 && !flag)
+            storeFail(username, pass);
+    }
     if (type == 1)
     {
-        cout << "Press (L) to Register again or the others to back to menu!\n";
+        cout << "Press (R) to Register again or the others to back to menu!\n";
         char ch = getch();
-        if (ch == 'L' || ch == 'l')
+        if (ch == 'R' || ch == 'r')
             registration(1, usernameBit, weakPassBit);
         else
-            process();
+            process(usernameBit, weakPassBit);
     }
 }
 
@@ -187,67 +257,62 @@ void multipleRegistrations(bool usernameBit[], bool weakPassBit[])
         cout << "Account " << i + 1 << ' ';
         registration(2, usernameBit, weakPassBit);
     }
-    backToMenu();
+    backToMenu(usernameBit, weakPassBit);
 }
 
 void changePassword(string username, string pass, bool usernameBit[], bool weakPassBit[]);
 
 void login(int type, bool usernameBit[], bool weakPassBit[])
 {
+    bool flag = false;
     cout << "Login\n";
     string username = "", pass = "";
     cout << "Username: ";
     getline(cin, username);
     cout << "Password: ";
     getline(cin, pass);
-    if (!validUsername(username))
-        cout << "Unvalid username!\n";
-    if (!validPassword(pass))
-        cout << "Unvalid password!\n";
-    if (validUsername(username) && validPassword(pass))
+    if (!isContain(usernameBit, username))
     {
-        if (!isContain(usernameBit, username))
-            cout << "Username does not found!";
-        else
+        flag = true;
+        cout << "Username does not found!\n";
+    }
+    ifstream fin("SignUp.txt");
+    if (!fin)
+    {
+        cout << "Error: Can not open file!\n";
+        return;
+    }
+    string tmpUsername = "", tmpPass = "";
+    while (!fin.eof())
+    {
+        getline(fin, tmpUsername, ' ');
+        getline(fin, tmpPass, '\n');
+        if (tmpUsername == "")
+            break;
+        if (username == tmpUsername && pass == tmpPass)
         {
-            ifstream fin("SignUp.txt");
-            if (!fin)
+            fin.close();
+            if (type == 1)
             {
-                cout << "Error: Can not open file!\n";
-                return;
-            }
-            string tmpUsername = "", tmpPass = "";
-            while (!fin.eof())
-            {
-                getline(fin, tmpUsername, ' ');
-                getline(fin, tmpPass, '\n');
-                if (tmpUsername == "")
-                    break;
-                if (username == tmpUsername && pass == tmpPass)
+                cout << "Login sucessfully!\nPress (1) to Change Password | Press (2) to back to menu\n";
+                while (1)
                 {
-                    fin.close();
-                    if (type == 1)
-                    {
-                        cout << "Login sucessfully!\nPress (1) to Change Password | Press (2) to back to menu\n";
-                        while (1)
-                        {
-                            char ch = getch();
-                            if (ch == '1')
-                                return changePassword(username, pass, usernameBit, weakPassBit);
-                            if (ch == '2')
-                                return process(usernameBit, weakPassBit);
-                            cout << "Wrong input!\n";
-                        }
-                    }
-                    else
+                    char ch = getch();
+                    if (ch == '1')
                         return changePassword(username, pass, usernameBit, weakPassBit);
-                    return;
+                    if (ch == '2')
+                        return process(usernameBit, weakPassBit);
+                    cout << "Wrong input!\n";
                 }
             }
-            fin.close();
-            cout << "Wrong username or password!\n";
+            else
+                return changePassword(username, pass, usernameBit, weakPassBit);
+            return;
         }
     }
+    fin.close();
+    if (!flag)
+        cout << "Wrong Password!\n";
     cout << "Press (L) to Login again or the others to back to menu!\n";
     char ch = getch();
     if (ch == 'L' || ch == 'l')
@@ -282,9 +347,9 @@ void changePassword(string username, string pass, bool usernameBit[], bool weakP
         {
             cout << "Input new password: ";
             getline(cin, newPass);
-            while (!validPassword(newPass) || isContain(weakPassBit, newPass))
+            while (!validPassword(newPass, username, weakPassBit))
             {
-                cout << "Unvalid Password, please input valid password: ";
+                cout << "Please input valid password: ";
                 getline(cin, newPass);
             }
             cout << "Your Password has been changed!\n";
@@ -293,8 +358,6 @@ void changePassword(string username, string pass, bool usernameBit[], bool weakP
         account.push_back({tmpUsername, tmpPass});
     }
     fin.close();
-    for (int i = 0; i < account.size(); i++)
-        cout << account[i].first << ' ' << account[i].second << endl;
     ofstream fout("SignUp.txt");
     if (!fout)
     {
@@ -304,7 +367,7 @@ void changePassword(string username, string pass, bool usernameBit[], bool weakP
     for (int i = 0; i < account.size(); i++)
         fout << account[i].first << ' ' << account[i].second << endl;
     fout.close();
-    backToMenu();
+    backToMenu(usernameBit, weakPassBit);
 }
 
 void process(bool usernameBit[], bool weakPassBit[])
