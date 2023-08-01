@@ -313,8 +313,11 @@ void changePassword(string username, string pass, bool usernameBit[], bool weakP
         {
             cout << "Input new password: ";
             getline(cin, newPass);
-            while (!validPassword(newPass, username, weakPassBit))
+            while (!validPassword(newPass, username, weakPassBit) || newPass == pass)
             {
+                if (newPass == pass)
+                    cout << "New password must be different from current password!\n";
+
                 cout << "Please input valid password: ";
                 getline(cin, newPass);
             }
