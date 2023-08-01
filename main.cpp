@@ -62,7 +62,7 @@ void insertToBit(bool *bitArray, string str)
 bool *buildUsernameBit()
 {
     bool *bitArray = new bool[MAX_SIZE]{false};
-    ifstream fin("Signup.txt");
+    ifstream fin("UserData.txt");
     if (!fin)
         return bitArray;
     while (!fin.eof())
@@ -179,7 +179,7 @@ void backToMenu(bool usernameBit[], bool weakPassBit[])
 
 void store(string username, string pass)
 {
-    ofstream fout("SignUp.txt", ios::app);
+    ofstream fout("UserData.txt", ios::app);
     if (!fout)
     {
         cout << "Error: Can not open file!\n";
@@ -276,7 +276,7 @@ void login(int type, bool usernameBit[], bool weakPassBit[])
         flag = true;
         cout << "Username does not found!\n";
     }
-    ifstream fin("SignUp.txt");
+    ifstream fin("UserData.txt");
     if (!fin)
     {
         cout << "Error: Can not open file!\n";
@@ -328,7 +328,7 @@ void changePassword(string username, string pass, bool usernameBit[], bool weakP
         cout << "Please login first!\n";
         login(2, usernameBit, weakPassBit);
     }
-    ifstream fin("SignUp.txt");
+    ifstream fin("UserData.txt");
     if (!fin)
     {
         cout << "Error: Can not open file!\n";
@@ -358,7 +358,7 @@ void changePassword(string username, string pass, bool usernameBit[], bool weakP
         account.push_back({tmpUsername, tmpPass});
     }
     fin.close();
-    ofstream fout("SignUp.txt");
+    ofstream fout("UserData.txt");
     if (!fout)
     {
         cout << "Error: Can not open file!\n";
