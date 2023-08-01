@@ -1,35 +1,48 @@
 #include "header.h"
 
-int hash_1(string str)
+
+int hash_1(string s)
 {
-    return str.length() % MAX_SIZE;
+    ll int hash = 0;
+    for (int i = 0; i < s.size(); i++)
+    {
+        hash = (hash + ((int)s[i]));
+        hash = hash % MAX_SIZE;
+    }
+    return hash;
 }
 
-int hash_2(string str)
+int hash_2(string s)
 {
-    int hash = 3;
-    for (int i = 0; i < str.length(); i++)
+    ll int hash = 1;
+    for (int i = 0; i < s.size(); i++)
     {
-        hash *= (int)str[i];
+        hash = hash + pow(19, i) * s[i];
         hash = hash % MAX_SIZE;
     }
     return hash % MAX_SIZE;
 }
 
-int hash_3(string str)
+int hash_3(string s)
 {
-    int hash = 0;
-    for (int i = 0; i < str.length(); i++)
+    ll int hash = 7;
+    for (int i = 0; i < s.size(); i++)
     {
-        hash += int(str[i]) ^ i;
-        hash %= MAX_SIZE;
+        hash = (hash * 31 + s[i]) % MAX_SIZE;
     }
     return hash % MAX_SIZE;
 }
 
-int hash_4(string str)
+int hash_4(string s)
 {
-    return (hash_1(str) + hash_2(str) * hash_2(str) + hash_3(str) * 13) % MAX_SIZE;
+    ll int hash = 3;
+    int p = 7;
+    for (int i = 0; i < s.size(); i++)
+    {
+        hash += hash * 7 + s[0] * pow(p, i);
+        hash = hash % MAX_SIZE;
+    }
+    return hash;
 }
 
 bool isContain(bool *bitArray, string str)
@@ -50,4 +63,3 @@ void insertToBit(bool *bitArray, string str)
     bitArray[index_1] = bitArray[index_2] = bitArray[index_3] = bitArray[index_4] = true;
     return;
 }
-

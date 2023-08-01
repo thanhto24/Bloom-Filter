@@ -8,12 +8,14 @@ bool *buildUsernameBit()
         return bitArray;
     while (!fin.eof())
     {
-        string username, tmp;
+        string username = "", pass = "";
         fin >> username;
         fin.ignore();
-        insertToBit(bitArray, username);
-        fin >> tmp;
+        if (username == "")
+            break;
+        fin >> pass;
         fin.ignore();
+        insertToBit(bitArray, username);
     }
     fin.close();
     return bitArray;
@@ -27,8 +29,10 @@ bool *buildWeakPassBit()
         return bitArray;
     while (!fin.eof())
     {
-        string weakPass;
+        string weakPass = "";
         fin >> weakPass;
+        if (weakPass == "")
+            break;
         insertToBit(bitArray, weakPass);
     }
     fin.close();
@@ -188,16 +192,37 @@ void registration(int type, bool usernameBit[], bool weakPassBit[])
 
 void multipleRegistrations(bool usernameBit[], bool weakPassBit[])
 {
-    cout << "Multiple registrations\n";
-    cout << "Enter number of accounts you want to register: ";
-    int num;
-    cin >> num;
-    cin.ignore();
-    for (int i = 0; i < num; i++)
+    ifstream fin("SignUp.txt");
+    if (!fin)
+        return;
+    int cnt = 0, dem = 0;
+    while (!fin.eof())
     {
-        cout << "Account " << i + 1 << ' ';
-        registration(2, usernameBit, weakPassBit);
+        dem++;
+        string username = "", pass = "";
+        getline(fin, username, ' ');
+        getline(fin, pass, '\n');
+        if (username == "")
+            break;
+        cout << "Regisstration " << dem << "\nUsername: " << username << endl
+             << "Password: " << pass << endl;
+        if (validUsername(username, usernameBit))
+        {
+            if (validPassword(pass, username, weakPassBit))
+            {
+                insertToBit(usernameBit, username);
+                store(username, pass);
+                cout << "Register Successfully!\n";
+                cnt++;
+            }
+            else
+                storeFail(username, pass);
+        }
+        else
+            storeFail(username, pass);
     }
+    fin.close();
+    cout << cnt << " account were registed successfully!\n";
     backToMenu(usernameBit, weakPassBit);
 }
 
@@ -373,4 +398,3 @@ void process(bool usernameBit[], bool weakPassBit[])
         }
     }
 }
-

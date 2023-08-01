@@ -1,10 +1,12 @@
 #pragma once
 #include <iostream>
-#include <cstring>
+#include <string.h>
 #include <conio.h>
 #include <fstream>
 #include <vector>
+#include <math.h>
+#define ll long long
 
 using namespace std;
 
-const int MAX_SIZE = 1000;
+const int MAX_SIZE = 1009;
