@@ -1,6 +1,5 @@
 #include "header.h"
 
-
 int hash_1(string s)
 {
     ll int hash = 0;

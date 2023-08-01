@@ -398,3 +398,4 @@ void process(bool usernameBit[], bool weakPassBit[])
         }
     }
 }
+
